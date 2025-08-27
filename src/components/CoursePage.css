@@ -1,0 +1,83 @@
+/* src/components/CoursePage.css */
+
+/* Smooth fade-in for the whole page */
+.max-w-5xl {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Gradient hero animation */
+.bg-gradient-to-r {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Lesson cards */
+.lesson-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  border: 1px solid #e5e7eb; /* subtle border */
+}
+
+.lesson-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Number badge */
+.lesson-badge {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.lesson-card:hover .lesson-badge {
+  background-color: #4f46e5; /* indigo-600 */
+  color: white;
+}
+
+/* Lesson content */
+.lesson-card p {
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+/* CTA Button */
+.cta-btn {
+  transition: all 0.25s ease;
+  padding: 0.85rem 2.5rem;
+  font-size: 1.15rem;
+  border-radius: 0.75rem;
+}
+
+.cta-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+}
+
+/* Sticky CTA bar (like Coursera/Udemy) */
+.sticky-cta {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  z-index: 50;
+}

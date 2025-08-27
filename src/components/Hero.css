@@ -1,0 +1,25 @@
+.hero-container {
+  text-align: center;
+  padding: 100px 20px;
+  background-image: url('/public/marine-bg.jpg'); /* Ensure the image is in src */
+  background-size: cover;
+  background-position: center;
+  color: white;
+  height: 100vh;
+}
+
+.start-btn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  font-size: 16px;
+  background-color: #004080;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.start-btn:hover {
+  background-color: #0066cc;
+}
