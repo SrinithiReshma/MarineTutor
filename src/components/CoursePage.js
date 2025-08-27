@@ -1,8 +1,7 @@
-// src/components/CoursePage.jsx
 import React, { useEffect, useState } from "react";
 import { Client, Databases, Query } from "appwrite";
+import { useNavigate } from "react-router-dom"; // import useNavigate
 import './CoursePage.css';
-
 
 const client = new Client()
   .setEndpoint("https://cloud.appwrite.io/v1")
@@ -18,6 +17,7 @@ function CoursePage({ moduleId = "1" }) {
   const [module, setModule] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // hook to navigate to another page
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,37 +69,32 @@ function CoursePage({ moduleId = "1" }) {
       </div>
 
       {/* Lessons */}
-<div className="space-y-6">
-  {lessons.map((lesson, index) => (
-    <div
-      key={lesson.$id}
-      className="lesson-card p-6 rounded-xl bg-white"
-    >
-      <div className="flex items-center gap-3">
-        <span className="lesson-badge flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 font-bold">
-          {index + 1}
-        </span>
-        <h3 className="text-xl font-semibold text-gray-800">
-          {lesson.title}
-        </h3>
+      <div className="space-y-6">
+        {lessons.map((lesson, index) => (
+          <div
+            key={lesson.$id}
+            className="lesson-card p-6 rounded-xl bg-white"
+          >
+            <div className="flex items-center gap-3">
+              <span className="lesson-badge flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 font-bold">
+                {index + 1}
+              </span>
+              <h3 className="text-xl font-semibold text-gray-800">
+                {lesson.title}
+              </h3>
+            </div>
+            <p className="mt-3 text-gray-600">{lesson.content}</p>
+          </div>
+        ))}
       </div>
-      <p className="mt-3 text-gray-600">{lesson.content}</p>
-    </div>
-  ))}
-</div>
 
-{/* Sticky CTA */}
-<div className="sticky-cta">
-  <button className="cta-btn bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 transition">
-    Get Certified 🚀
-  </button>
-</div>
-
-
-      {/* Call to Action */}
+      {/* Go to Quiz Button */}
       <div className="mt-12 text-center">
-        <button className="px-8 py-3 bg-indigo-600 text-white font-semibold text-lg rounded-xl shadow hover:bg-indigo-700 transition">
-          start Quiz🚀
+        <button
+          onClick={() => navigate(`/quiz/${moduleId}`)} // navigate to quiz page
+          className="px-8 py-3 bg-indigo-600 text-white font-semibold text-lg rounded-xl shadow hover:bg-indigo-700 transition"
+        >
+          Go to Quiz 🚀
         </button>
       </div>
     </div>
