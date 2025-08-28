@@ -91,11 +91,12 @@ function CoursePage({ moduleId = "1" }) {
       {/* Go to Quiz Button */}
       <div className="mt-12 text-center">
         <button
-          onClick={() => navigate(`/quiz/${moduleId}`)} // navigate to quiz page
-          className="px-8 py-3 bg-indigo-600 text-white font-semibold text-lg rounded-xl shadow hover:bg-indigo-700 transition"
-        >
-          Go to Quiz 🚀
-        </button>
+  onClick={() => navigate(`/adaptive/${moduleId}`)} // ✅ now goes to adaptive quiz
+  className="px-8 py-3 bg-indigo-600 text-white font-semibold text-lg rounded-xl shadow hover:bg-indigo-700 transition"
+>
+  Go to Adaptive Quiz 🚀
+</button>
+
       </div>
     </div>
   );

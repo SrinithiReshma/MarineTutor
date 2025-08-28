@@ -2,8 +2,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import CoursePage from "./components/CoursePage";
-import QuizPage from "./components/QuizPage"; // <-- create this file
-import DescriptiveQuizPage from "./components/DescriptiveQuizPage";
+
+import AdaptiveQuizPage from "./components/AdaptiveQuizPage"; // ✅ import new page
 
 const App = () => {
   return (
@@ -13,9 +13,10 @@ const App = () => {
           {/* Default route (course page) */}
           <Route path="/" element={<CoursePage />} />
 
-          {/* Quiz route with moduleId */}
-          <Route path="/quiz/:moduleId" element={<QuizPage />} />
-          <Route path="/descriptive/:moduleId" element={<DescriptiveQuizPage />} />
+         
+
+          {/* ✅ New adaptive quiz route */}
+          <Route path="/adaptive/:moduleId" element={<AdaptiveQuizPage />} />
         </Routes>
       </div>
     </Router>
