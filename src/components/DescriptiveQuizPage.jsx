@@ -17,23 +17,41 @@ function DescriptiveQuizPage() {
   const [collectedData, setCollectedData] = useState([]);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        // Anonymous login if needed
-        await account.createAnonymousSession();
-
-        const response = await databases.listDocuments(
-          "6894724e002dc704b552",
-          "68947e47002a0169e04c", // descriptive questions collection
-          [Query.equal("module_id", moduleId)]
-        );
-        setQuestions(response.documents);
-      } catch (error) {
-        console.error("Error fetching descriptive questions:", error);
+  const init = async () => {
+    try {
+      // Try to get current session
+      await account.getSession("current");
+      console.log("Reusing existing session");
+    } catch (error) {
+      if (error.code === 401) {
+        // No session exists → create anonymous session
+        try {
+          await account.createAnonymousSession();
+          console.log("Anonymous session created");
+        } catch (err) {
+          console.error("Failed to create anonymous session:", err);
+        }
+      } else {
+        console.error("Unexpected error fetching session:", error);
       }
-    };
-    init();
-  }, [moduleId]);
+    }
+
+    // Now safely fetch descriptive questions
+    try {
+      const response = await databases.listDocuments(
+        "6894724e002dc704b552", // databaseId
+        "68947e47002a0169e04c", // descriptive collection
+        [Query.equal("module_id", moduleId)]
+      );
+      setQuestions(response.documents);
+    } catch (err) {
+      console.error("Error fetching descriptive questions:", err);
+    }
+  };
+
+  init();
+}, [moduleId]);
+
 
   const handleChange = (questionId, value) => {
     setAnswers((prev) => ({
