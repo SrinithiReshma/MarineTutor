@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";  
 import { Client, Databases, Query } from "appwrite";
-import { useNavigate } from "react-router-dom"; // import useNavigate
-import './CoursePage.css';
+import { useNavigate } from "react-router-dom";
+import "./CoursePage.css";
 
 const client = new Client()
   .setEndpoint("https://cloud.appwrite.io/v1")
@@ -17,7 +17,7 @@ function CoursePage({ moduleId = "1" }) {
   const [module, setModule] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // hook to navigate to another page
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,12 +53,39 @@ function CoursePage({ moduleId = "1" }) {
     return <p className="text-center text-lg text-gray-500 mt-10">Loading...</p>;
   if (!module) return <p className="text-center text-red-500">No module found</p>;
 
+  const renderContent = (sections) => {
+    if (!sections) return null;
+
+    return sections.map((section, idx) => {
+      switch (section.type) {
+        case "heading":
+          return <h2 key={idx} className="lesson-heading">{section.text}</h2>;
+        case "subheading":
+          return <h3 key={idx} className="lesson-subheading">{section.text}</h3>;
+        case "paragraph":
+          return <p key={idx} className="lesson-paragraph">{section.text}</p>;
+        case "list":
+          return (
+            <ul key={idx} className="lesson-list">
+              {section.items.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          );
+        default:
+          return null;
+      }
+    });
+  };
+
   return (
-    <div className="max-w-5xl mx-auto p-8">
-      {/* Banner / Hero Section */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl p-10">
+    <div className="max-w-6xl mx-auto p-8">
+      {/* Banner Section */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl p-10 mb-10">
         <h1 className="text-4xl font-extrabold">{module.title}</h1>
-        <p className="mt-4 text-lg opacity-90">{module.description}</p>
+        <p className="mt-4 text-lg opacity-90 whitespace-pre-line">
+          {module.description}
+        </p>
         {module.images && (
           <img
             src={module.images}
@@ -68,38 +95,45 @@ function CoursePage({ moduleId = "1" }) {
         )}
       </div>
 
-      {/* Lessons */}
-      <div className="space-y-6">
-        {lessons.map((lesson, index) => (
-          <div
-            key={lesson.$id}
-            className="lesson-card p-6 rounded-xl bg-white"
-          >
-            <div className="flex items-center gap-3">
-              <span className="lesson-badge flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 font-bold">
-                {index + 1}
-              </span>
-              <h3 className="text-xl font-semibold text-gray-800">
-                {lesson.title}
-              </h3>
+      {/* Lessons Section */}
+      {lessons.map((lesson, index) => {
+        let sections = [];
+
+        try {
+          // Parse JSON if content is string
+          if (typeof lesson.content === "string") {
+            const parsed = JSON.parse(lesson.content);
+            sections = parsed.sections || [];
+          } else {
+            sections = lesson.content?.sections || [];
+          }
+        } catch (err) {
+          console.error("Error parsing lesson content:", err);
+        }
+
+        return (
+          <div key={lesson.$id} className="lesson-card">
+            <div className="lesson-header">
+              <div className="lesson-badge">{index + 1}</div>
+              <h3 className="lesson-title">{lesson.title}</h3>
             </div>
-            <p className="mt-3 text-gray-600">{lesson.content}</p>
+            <div className="lesson-content">
+              {renderContent(sections)}
+            </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
 
       {/* Go to Quiz Button */}
       <div className="mt-12 text-center">
         <button
-  onClick={() => navigate(`/adaptive/${moduleId}`)} // ✅ now goes to adaptive quiz
-  className="px-8 py-3 bg-indigo-600 text-white font-semibold text-lg rounded-xl shadow hover:bg-indigo-700 transition"
->
-  Go to Adaptive Quiz 🚀
-</button>
-
+          onClick={() => navigate(`/adaptive/${moduleId}`)}
+          className="cta-btn bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700"
+        >
+          Go to Adaptive Quiz 🚀
+        </button>
       </div>
     </div>
   );
 }
-
 export default CoursePage;

@@ -1,83 +1,88 @@
-/* src/components/CoursePage.css */
-
-/* Smooth fade-in for the whole page */
-.max-w-5xl {
-  animation: fadeIn 0.8s ease-in-out;
+/* Book-style headings */
+.lesson-heading {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.25rem;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.lesson-subheading {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #34495e;
 }
 
-/* Gradient hero animation */
-.bg-gradient-to-r {
-  background-size: 200% 200%;
-  animation: gradientShift 8s ease infinite;
+.lesson-paragraph {
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+  color: #555;
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.lesson-list {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-/* Lesson cards */
+.lesson-list li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Card and badge styling */
 .lesson-card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  cursor: pointer;
-  border: 1px solid #e5e7eb; /* subtle border */
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0px 6px 18px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease-in-out;
 }
 
 .lesson-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-5px);
 }
 
-/* Number badge */
+.lesson-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
 .lesson-badge {
-  font-family: "Inter", sans-serif;
+  width: 40px;
+  height: 40px;
+  background-color: #e0e7ff;
+  color: #4f46e5;
   font-weight: 700;
-  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  margin-right: 15px;
 }
 
-.lesson-card:hover .lesson-badge {
-  background-color: #4f46e5; /* indigo-600 */
-  color: white;
-}
-
-/* Lesson content */
-.lesson-card p {
-  line-height: 1.7;
-  font-size: 0.95rem;
+.lesson-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 /* CTA Button */
 .cta-btn {
-  transition: all 0.25s ease;
   padding: 0.85rem 2.5rem;
   font-size: 1.15rem;
   border-radius: 0.75rem;
+  transition: all 0.25s ease;
 }
 
 .cta-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
-}
-
-/* Sticky CTA bar (like Coursera/Udemy) */
-.sticky-cta {
-  position: sticky;
-  bottom: 0;
-  background: white;
-  padding: 1rem;
-  border-top: 1px solid #e5e7eb;
-  text-align: center;
-  z-index: 50;
 }
