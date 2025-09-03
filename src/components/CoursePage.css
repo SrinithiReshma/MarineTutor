@@ -1,52 +1,71 @@
-/* Book-style headings */
-.lesson-heading {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  color: #2c3e50;
-  border-bottom: 2px solid #e5e7eb;
-  padding-bottom: 0.25rem;
+/* General Page Styling */
+.course-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(to right, #d9f0e5, #f0fff4); /* Green gradient background */
 }
 
-.lesson-subheading {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: #34495e;
-}
-
-.lesson-paragraph {
-  font-size: 1rem;
-  line-height: 1.8;
-  margin-bottom: 1rem;
+/* Loading & Error Text */
+.loading-text,
+.error-text {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 3rem;
   color: #555;
 }
 
-.lesson-list {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
+.error-text {
+  color: #e74c3c;
 }
 
-.lesson-list li {
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
+/* Banner Card */
+.banner-card {
+  background: linear-gradient(90deg, #276749, #68d391);
+  color: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  padding: 2.5rem;
+  margin-bottom: 2.5rem;
 }
 
-/* Card and badge styling */
+.banner-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.banner-description {
+  margin-top: 1rem;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  white-space: pre-line;
+  opacity: 0.9;
+}
+
+.banner-image {
+  margin-top: 1.5rem;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 1rem;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+/* Card-style text blocks for lessons */
 .lesson-card {
   background: #ffffff;
   border-radius: 12px;
-  padding: 20px;
+  padding: 25px;
   margin-bottom: 25px;
-  box-shadow: 0px 6px 18px rgba(0,0,0,0.08);
+  box-shadow: 0px 8px 25px rgba(0,0,0,0.1);
   transition: transform 0.2s ease-in-out;
 }
 
 .lesson-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0px 12px 30px rgba(0,0,0,0.15);
 }
 
 .lesson-header {
@@ -56,10 +75,10 @@
 }
 
 .lesson-badge {
-  width: 40px;
-  height: 40px;
-  background-color: #e0e7ff;
-  color: #4f46e5;
+  width: 45px;
+  height: 45px;
+  background-color: #c6f6d5; /* soft green */
+  color: #276749;
   font-weight: 700;
   display: flex;
   justify-content: center;
@@ -69,20 +88,80 @@
 }
 
 .lesson-title {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: #2c3e50;
 }
 
+/* Card-style text inside lesson content */
+.lesson-content > * {
+  background-color: #f9fff9; /* subtle light card background */
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 12px;
+  box-shadow: 0px 3px 8px rgba(0,0,0,0.05);
+}
+
+/* Headings inside cards */
+.lesson-heading {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 0.8rem;
+  color: #2c3e50;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.25rem;
+}
+
+/* Subheadings */
+.lesson-subheading {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0.6rem;
+  color: #34495e;
+}
+
+/* Paragraphs */
+.lesson-paragraph {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.8rem;
+  color: #555;
+}
+
+/* Lists */
+.lesson-list {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.lesson-list li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
 /* CTA Button */
+.cta-container {
+  text-align: center;
+  margin-top: 3rem;
+}
+
 .cta-btn {
   padding: 0.85rem 2.5rem;
   font-size: 1.15rem;
   border-radius: 0.75rem;
+  background-color: #38a169; /* green */
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
   transition: all 0.25s ease;
 }
 
 .cta-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 8px 20px rgba(56, 161, 105, 0.35);
+  background-color: #2f855a;
 }

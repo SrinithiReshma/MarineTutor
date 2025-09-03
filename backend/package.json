@@ -6,9 +6,10 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "@google/generative-ai": "^0.24.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "@google/generative-ai": "^0.24.1"
+    "express": "^5.1.0",
+    "node-appwrite": "^18.0.0"
   }
 }

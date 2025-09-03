@@ -1,8 +1,9 @@
 // src/components/AdaptiveQuizPage.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Client, Databases, Query } from "appwrite";
 import axios from "axios";
+import "./AdaptiveQuizPage.css"; // your CSS file
 
 // ----------- Appwrite Setup -----------
 const client = new Client()
@@ -11,8 +12,13 @@ const client = new Client()
 
 const databases = new Databases(client);
 
+const DATABASE_ID = "6894724e002dc704b552"; 
+const REMEDIATION_THRESHOLD = 40;
+
 function AdaptiveQuizPage() {
   const { moduleId } = useParams();
+  const navigate = useNavigate();
+
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -20,59 +26,63 @@ function AdaptiveQuizPage() {
   const [scoreSummary, setScoreSummary] = useState({
     totalScore: 0,
     totalQuestions: 0,
-    maxScore: 0, // ✅ new: keep track of maximum possible score
+    maxScore: 0,
   });
 
-  // Utility: shuffle an array
   const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
   const pickRandom = (arr, n) => shuffle(arr).slice(0, n);
+useEffect(() => {
+  const fetchQuestions = async () => {
+    try {
+      const mcqRes = await databases.listDocuments(
+        DATABASE_ID,
+        "6894726b00342801a141",
+        [Query.equal("module_id", moduleId)]
+      );
+      const descRes = await databases.listDocuments(
+        DATABASE_ID,
+        "68947e47002a0169e04c",
+        [Query.equal("module_id", moduleId)]
+      );
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        // fetch MCQs
-        const mcqRes = await databases.listDocuments(
-          "6894724e002dc704b552",
-          "6894726b00342801a141", // mcq collection
-          [Query.equal("module_id", moduleId)]
-        );
+      const mcqs = mcqRes.documents.map((q) => ({ ...q, type: "mcq" }));
+      const descs = descRes.documents.map((q) => ({ ...q, type: "descriptive" }));
 
-        // fetch Descriptive
-        const descRes = await databases.listDocuments(
-          "6894724e002dc704b552",
-          "68947e47002a0169e04c", // descriptive collection
-          [Query.equal("module_id", moduleId)]
-        );
+      // Helper: pick random n from an array
+      const pickRandom = (arr, n) => {
+        const shuffled = [...arr].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, Math.min(n, arr.length));
+      };
 
-        const allQuestions = [
-          ...mcqRes.documents.map((q) => ({ ...q, type: "mcq" })),
-          ...descRes.documents.map((q) => ({ ...q, type: "descriptive" })),
-        ];
+      // Function to pick 2 easy, 2 medium, 2 hard
+      const pickByDifficulty = (arr) => {
+        const easy = pickRandom(arr.filter((q) => q.tag === "easy"), 2);
+        const medium = pickRandom(arr.filter((q) => q.tag === "medium"), 2);
+        const hard = pickRandom(arr.filter((q) => q.tag === "hard"), 2);
+        return [...easy, ...medium, ...hard];
+      };
 
-        const easy = allQuestions.filter((q) => q.tag === "easy");
-        const medium = allQuestions.filter((q) => q.tag === "medium");
-        const hard = allQuestions.filter((q) => q.tag === "hard");
+      const selectedMcqs = pickByDifficulty(mcqs);
+      const selectedDescs = pickByDifficulty(descs);
 
-        const selected = [
-          ...pickRandom(easy, 3),
-          ...pickRandom(medium, 3),
-          ...pickRandom(hard, 4),
-        ];
+      // Final ordered list (MCQs first then descriptive)
+      const ordered = [...selectedMcqs, ...selectedDescs];
 
-        setQuestions(shuffle(selected));
-      } catch (err) {
-        console.error("Error fetching adaptive questions:", err);
-      }
-    };
+      setQuestions(ordered);
+    } catch (err) {
+      console.error("Error fetching questions:", err);
+    }
+  };
 
-    fetchQuestions();
-  }, [moduleId]);
+  fetchQuestions();
+}, [moduleId]);
+
+
 
   const handleChange = (qid, value) => {
     setAnswers((prev) => ({ ...prev, [qid]: value }));
   };
 
-  // ✅ Helper: weight by difficulty
   const getWeight = (tag) => {
     if (tag === "easy") return 1;
     if (tag === "medium") return 2;
@@ -84,9 +94,16 @@ function AdaptiveQuizPage() {
     let evalResults = {};
     let totalScore = 0;
     let maxScore = 0;
+    let mcqScore = 0;
+    let mcqcrt=0;
+    let desccrt=0,
+    
+      mcqMax = 0;
+    let descScore = 0,
+      descMax = 0;
 
     try {
-      // Save descriptive answers in buffer
+      // Save descriptive answers
       for (const q of questions) {
         if (q.type === "descriptive" && (answers[q.$id] || "").trim() !== "") {
           await axios.post("http://localhost:5000/save-answer", {
@@ -98,25 +115,26 @@ function AdaptiveQuizPage() {
         }
       }
 
-      // Process descriptive answers with Gemini
+      // Process descriptive answers
       const res = await axios.post("http://localhost:5000/process-answers");
       const descriptiveResults = res.data.evaluations || [];
 
-      // Map descriptive results back
+      // Map descriptive results
       descriptiveResults.forEach((r, i) => {
         const qObj = questions.filter((q) => q.type === "descriptive")[i];
+        if (!qObj) return;
         const weight = getWeight(qObj.tag);
         const qId = qObj.$id;
 
-        evalResults[qId] = {
-          ...r,
-          score: r.score * weight, // ✅ apply weight
-        };
-
+        evalResults[qId] = { ...r, score: r.score * weight };
         totalScore += evalResults[qId].score;
+        descScore += evalResults[qId].score;
+        descMax += 1; // Max descriptive weight
+        desccrt +=evalResults[qId].score>0 ? 1 : 0
+
       });
 
-      // Evaluate MCQs locally
+      // Evaluate MCQs
       for (const q of questions) {
         if (q.type === "mcq") {
           const isCorrect = answers[q.$id] === q.answer;
@@ -130,75 +148,91 @@ function AdaptiveQuizPage() {
           };
 
           totalScore += evalResults[q.$id].score;
+          mcqScore += evalResults[q.$id].score;
+          mcqMax += 1;
+          mcqcrt +=isCorrect ? 1 : 0
         }
       }
 
-      // ✅ Calculate max possible score
       maxScore = questions.reduce((sum, q) => sum + getWeight(q.tag), 0);
 
       setEvaluations(evalResults);
       setSubmitted(true);
 
-      setScoreSummary({
-        totalScore,
-        totalQuestions: questions.length,
-        maxScore,
-      });
+      setScoreSummary({ totalScore, totalQuestions: questions.length, maxScore });
+      console.log(mcqScore);
+      console.log(descScore);
+
+      const mcqPercent = mcqMax > 0 ? (mcqcrt/ 6) * 100 : 0;
+      const descPercent = descMax > 0 ? (desccrt / 6) * 100 : 0;
+      console.log("mcqpercent:"+mcqPercent);
+      console.log("desc percent"+descPercent);
+
+      // ---------- Decision logic ----------
+      if (mcqPercent < 40 && descPercent < 60) {
+        const combinedRes = await axios.post(
+          "http://localhost:5000/generate-combined-remediation",
+          { moduleId }
+        );
+        navigate("/combined-remediation", { state: combinedRes.data });
+        return;
+      } else if (mcqPercent < 40) {
+        const mnemonicRes = await axios.post(
+          "http://localhost:5000/generate-mnemonic-remediation",
+          { moduleId }
+        );
+        navigate("/mnemonic-remediation", { state: mnemonicRes.data });
+        return;
+      } else if (descMax < REMEDIATION_THRESHOLD) {
+        const genRes = await axios.post("http://localhost:5000/generate-remediation", {
+          moduleId,
+        });
+        navigate("/remediation", { state: genRes.data });
+      }
     } catch (err) {
       console.error("Error submitting quiz:", err);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-50 to-green-100 p-8">
-      <h1 className="text-4xl font-extrabold text-center text-green-800 mb-8">
-        Adaptive Quiz for Module {moduleId}
-      </h1>
+    <div className="quiz-page">
+      <h1 className="quiz-title">Adaptive Quiz for Module {moduleId}</h1>
 
       {!submitted ? (
-        <div className="max-w-3xl mx-auto space-y-8">
+        <div className="questions-container">
           {questions.map((q, index) => (
-            <div
-              key={q.$id}
-              className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200 hover:shadow-xl transition"
-            >
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            <div key={q.$id} className="question-card">
+              <h2 className="question-title">
                 {index + 1}. {q.question}{" "}
-                <span className="text-sm text-gray-500">({q.tag})</span>
+                <span className="question-tag">({q.tag})</span>
               </h2>
 
               {q.type === "mcq" ? (
-                <div className="space-y-3">
-                  {[q.option1, q.option2, q.option3, q.option4].map(
-                    (opt, i) => (
-                      <label
-                        key={i}
-                        className={`flex items-center p-3 rounded-xl cursor-pointer border transition
-                          ${
-                            answers[q.$id] === opt
-                              ? "bg-green-100 border-green-500"
-                              : "bg-gray-50 border-gray-300 hover:bg-gray-100"
-                          }`}
-                      >
-                        <input
-                          type="radio"
-                          name={`q-${q.$id}`}
-                          value={opt}
-                          checked={answers[q.$id] === opt}
-                          onChange={() => handleChange(q.$id, opt)}
-                          className="hidden"
-                        />
-                        <span className="text-gray-700">{opt}</span>
-                      </label>
-                    )
-                  )}
+                <div className="options-container">
+                  {[q.option1, q.option2, q.option3, q.option4].map((opt, i) => (
+                    <label
+                      key={i}
+                      className={`option-label ${
+                        answers[q.$id] === opt ? "option-selected" : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={`q-${q.$id}`}
+                        value={opt}
+                        checked={answers[q.$id] === opt}
+                        onChange={() => handleChange(q.$id, opt)}
+                      />
+                      <span>{opt}</span>
+                    </label>
+                  ))}
                 </div>
               ) : (
                 <textarea
                   value={answers[q.$id] || ""}
                   onChange={(e) => handleChange(q.$id, e.target.value)}
                   placeholder="Write your answer here..."
-                  className="w-full p-4 border border-gray-300 rounded-xl shadow-sm focus:ring focus:ring-green-200 focus:outline-none"
+                  className="descriptive-input"
                   rows={4}
                 />
               )}
@@ -206,38 +240,29 @@ function AdaptiveQuizPage() {
           ))}
         </div>
       ) : (
-        <div className="max-w-3xl mx-auto space-y-8">
-          {/* ✅ Total Score Display */}
-          <div className="mb-8 p-6 bg-green-100 border border-green-400 rounded-2xl shadow-md text-center">
-            <h2 className="text-2xl font-bold text-green-800">
-              Your Total Score: {scoreSummary.totalScore} / {scoreSummary.maxScore}
-            </h2>
+        <div className="questions-container">
+          <div className="score-summary">
+            Your Total Score: {scoreSummary.totalScore} / {scoreSummary.maxScore}
           </div>
 
-          {/* Per-question Results */}
           {questions.map((q, index) => (
-            <div
-              key={q.$id}
-              className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200"
-            >
-              <h2 className="text-xl font-semibold mb-2 text-gray-800">
+            <div key={q.$id} className="question-card">
+              <h2 className="question-title">
                 {index + 1}. {q.question}{" "}
-                <span className="text-sm text-gray-500">({q.tag})</span>
+                <span className="question-tag">({q.tag})</span>
               </h2>
-              <p className="text-gray-600 mb-2">
+              <p>
                 <strong>Your Answer:</strong> {answers[q.$id] || "Not Answered"}
               </p>
-              <p className="text-gray-600 mb-2">
+              <p>
                 <strong>Correct Answer:</strong> {q.answer}
               </p>
-              <div className="p-3 bg-green-50 border border-green-300 rounded-xl">
+              <div className="evaluation-card">
                 <p>
-                  <strong>Score:</strong>{" "}
-                  {evaluations[q.$id]?.score ?? "N/A"}
+                  <strong>Score:</strong> {evaluations[q.$id]?.score ?? "N/A"}
                 </p>
                 <p>
-                  <strong>Feedback:</strong>{" "}
-                  {evaluations[q.$id]?.feedback ?? "No feedback"}
+                  <strong>Feedback:</strong> {evaluations[q.$id]?.feedback ?? "No feedback"}
                 </p>
               </div>
             </div>
@@ -246,11 +271,8 @@ function AdaptiveQuizPage() {
       )}
 
       {!submitted && (
-        <div className="flex justify-center mt-10">
-          <button
-            onClick={handleSubmit}
-            className="px-6 py-3 bg-green-600 text-white rounded-2xl shadow-lg hover:bg-green-700 transition text-lg font-semibold"
-          >
+        <div className="submit-container">
+          <button onClick={handleSubmit} className="submit-btn">
             Submit Quiz
           </button>
         </div>

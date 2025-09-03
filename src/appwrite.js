@@ -1,9 +1,11 @@
-import { Client, Databases } from "appwrite";
+import { Client, Databases, Query } from "node-appwrite";
 
-const client = new Client();
+// ---------- Appwrite Setup ----------
+const client = new Client()
+  .setEndpoint("https://cloud.appwrite.io/v1")
+  .setProject("6894720600211b693b69"); // same as frontend
 
-client
-  .setEndpoint("https://cloud.appwrite.io/v1") // replace with your endpoint
-  .setProject("6894720600211b693b69"); // replace with your project ID
+const databases = new Databases(client);
 
-export const databases = new Databases(client);
+const DATABASE_ID = "6894724e002dc704b552"; // your DB
+const LESSONS_COLLECTION_ID = "lessons";    // your lessons collection

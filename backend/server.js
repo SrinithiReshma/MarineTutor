@@ -1,4 +1,4 @@
-// server.js
+import { Client, Databases, Query } from "node-appwrite";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -6,37 +6,272 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
 
+// ✅ Appwrite setup
+const client = new Client()
+  .setEndpoint(process.env.APPWRITE_ENDPOINT)
+  .setProject(process.env.APPWRITE_PROJECT_ID)
+  .setKey(process.env.APPWRITE_API_KEY);
+
+const databases = new Databases(client);
+
+const DATABASE_ID = process.env.APPWRITE_DATABASE_ID;
+const LESSONS_COLLECTION_ID = process.env.APPWRITE_LESSONS_COLLECTION_ID;
+
+console.log("DATABASE_ID:", DATABASE_ID);
+console.log("LESSONS_COLLECTION_ID:", LESSONS_COLLECTION_ID);
+
+// ✅ Express setup
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Initialize Gemini client
+// ✅ Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genA = new GoogleGenerativeAI('AIzaSyA8TW55ydeFaoVJOCKg5MFzfEtjQyoDPrs');
 
-// Buffer to hold descriptive answers
+
+// Buffer for answers
 let answerBuffer = [];
 
 /**
- * Route 1: Save descriptive answers
+ * 🔹 Helper: Clean AI response to safe JSON
+ */
+const safeParse = (text, fallback) => {
+  try {
+    const clean = text.replace(/```json|```/g, "").trim();
+    return JSON.parse(clean);
+  } catch (err) {
+    console.error("❌ JSON Parse Failed:", text);
+    return fallback;
+  }
+};
+
+/**
+ * 🔹 Route 1: Combined Remediation (Conceptual + Memory)
+ */
+app.post("/generate-combined-remediation", async (req, res) => {
+  const { moduleId } = req.body;
+  if (!moduleId) return res.status(400).json({ error: "moduleId is required" });
+
+  try {
+    // Fetch lesson from DB
+    const lessonsRes = await databases.listDocuments(
+      DATABASE_ID,
+      LESSONS_COLLECTION_ID,
+      [Query.equal("module_d", moduleId)]
+    );
+
+    if (!lessonsRes.documents || lessonsRes.documents.length === 0) {
+      return res.status(404).json({ error: "No lesson content found in DB" });
+    }
+
+    const doc = lessonsRes.documents[0];
+    const moduleContent =
+      doc.content || doc.body || doc.description || JSON.stringify(doc);
+
+    // Prompts
+    const remediationPrompt = `
+You are an expert tutor. A student struggled in Module ${moduleId}.
+Generate a remediation package.
+Return ONLY JSON:
+{
+  "moduleId": "${moduleId}",
+  "explanation": "...",
+  "learningSteps": ["..."],
+  "examples": [{"title":"...","explain":"..."}],
+  "practiceExercises": [{"question":"...","answer":"..."}],
+  "summary": "..."
+}
+Module content:
+${moduleContent}
+`;
+
+    const mnemonicPrompt = `
+You are an expert memory coach.
+Return ONLY JSON:
+{
+  "moduleId": "${moduleId}",
+  "mnemonics": ["..."],
+  "visualCues": ["..."],
+  "flashcards": [{"question":"...","answer":"..."}],
+  "summaryPoints": ["..."]
+}
+Module content:
+${moduleContent}
+`;
+
+    const model = genA.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    let remediationResult, mnemonicResult;
+    try {
+      [remediationResult, mnemonicResult] = await Promise.all([
+        model.generateContent(remediationPrompt),
+        model.generateContent(mnemonicPrompt),
+      ]);
+    } catch (err) {
+      if (err.status === 429) {
+        return res.status(429).json({
+          moduleId,
+          error: "Gemini quota exceeded. Try again later.",
+        });
+      }
+      throw err;
+    }
+
+    const remediationJson = safeParse(
+      await remediationResult.response.text(),
+      { moduleId, explanation: "Failed to parse remediation JSON." }
+    );
+
+    const mnemonicJson = safeParse(
+      await mnemonicResult.response.text(),
+      { moduleId, mnemonics: [], summaryPoints: [], error: "Parsing failed" }
+    );
+
+    res.json({ moduleId, remediation: remediationJson, mnemonicRemediation: mnemonicJson });
+  } catch (err) {
+    console.error("Combined remediation error:", err);
+    res.status(500).json({ moduleId, error: "Failed to generate combined remediation." });
+  }
+});
+
+/**
+ * 🔹 Route 2: Save Answers Temporarily
  */
 app.post("/save-answer", (req, res) => {
   const { question, correctAnswer, userAnswer, userId } = req.body;
 
   if (!question || !correctAnswer || !userAnswer) {
-    return res
-      .status(400)
-      .json({ error: "question, correctAnswer, and userAnswer are required" });
+    return res.status(400).json({ error: "question, correctAnswer, and userAnswer are required" });
   }
 
   answerBuffer.push({ userId, question, correctAnswer, userAnswer });
-  res.json({
-    message: "Answer saved successfully",
-    bufferSize: answerBuffer.length,
-  });
+  res.json({ message: "Answer saved successfully", bufferSize: answerBuffer.length });
 });
 
 /**
- * Route 2: Process all answers with Gemini
+ * 🔹 Route 3: Generate Conceptual Remediation
+ */
+app.post("/generate-remediation", async (req, res) => {
+  const { moduleId } = req.body;
+  if (!moduleId) return res.status(400).json({ error: "moduleId is required" });
+
+  try {
+    const lessonsRes = await databases.listDocuments(
+      DATABASE_ID,
+      LESSONS_COLLECTION_ID,
+      [Query.equal("module_d", moduleId)]
+    );
+
+    if (!lessonsRes.documents || lessonsRes.documents.length === 0) {
+      return res.status(404).json({ error: "No lesson content found in DB" });
+    }
+
+    const doc = lessonsRes.documents[0];
+    const moduleContent =
+      doc.content || doc.body || doc.description || JSON.stringify(doc);
+
+    // ✅ Prepare Gemini model & prompt inside try
+    const model = genA.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const prompt = `
+You are an expert tutor.
+Return ONLY JSON with:
+{
+  "moduleId": "${moduleId}",
+  "explanation": "...",
+  "learningSteps": ["..."],
+  "examples": [{"title":"...","explain":"..."}],
+  "practiceExercises": [{"question":"...","answer":"..."}],
+  "summary": "..."
+}
+Module content:
+${moduleContent}
+    `;
+
+    let result;
+    try {
+      result = await model.generateContent(prompt);
+    } catch (err) {
+      if (err.status === 429) {
+        return res
+          .status(429)
+          .json({ moduleId, error: "Gemini quota exceeded. Try again later." });
+      }
+      throw err;
+    }
+
+    const parsed = safeParse(await result.response.text(), {
+      moduleId,
+      explanation: "Parsing failed",
+    });
+
+    res.json(parsed);
+  } catch (error) {
+    console.error("Remediation generation error:", error);
+    res.status(500).json({
+      moduleId,
+      explanation: "Failed to generate remediation.",
+    });
+  }
+});
+
+/**
+ * 🔹 Route 4: Generate Mnemonic Remediation
+ */
+app.post("/generate-mnemonic-remediation", async (req, res) => {
+  const { moduleId } = req.body;
+  if (!moduleId) return res.status(400).json({ error: "moduleId is required" });
+
+  try {
+    const lessonsRes = await databases.listDocuments(
+      DATABASE_ID,
+      LESSONS_COLLECTION_ID,
+      [Query.equal("module_d", moduleId)]
+    );
+
+    if (!lessonsRes.documents || lessonsRes.documents.length === 0) {
+      return res.status(404).json({ error: "No lesson content found in DB" });
+    }
+
+    const doc = lessonsRes.documents[0];
+    const moduleContent =
+      doc.content || doc.body || doc.description || JSON.stringify(doc);
+
+    const model = genA.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const prompt = `
+You are an expert memory coach.
+Return ONLY JSON with:
+{
+  "moduleId": "${moduleId}",
+  "mnemonics": ["..."],
+  "visualCues": ["..."],
+  "flashcards": [{"question":"...","answer":"..."}],
+  "summaryPoints": ["..."]
+}
+Module content:
+${moduleContent}
+    `;
+
+    let result;
+    try {
+      result = await model.generateContent(prompt);
+    } catch (err) {
+      if (err.status === 429) {
+        return res.status(429).json({ moduleId, error: "Gemini quota exceeded. Try again later." });
+      }
+      throw err;
+    }
+
+    const parsed = safeParse(await result.response.text(), { moduleId, mnemonics: [], summaryPoints: [], error: "Parsing failed" });
+    res.json(parsed);
+  } catch (error) {
+    console.error("Mnemonic remediation generation error:", error);
+    res.status(500).json({ moduleId, explanation: "Failed to generate mnemonic remediation." });
+  }
+});
+
+/**
+ * 🔹 Route 5: Process Student Answers (Grading)
  */
 app.post("/process-answers", async (req, res) => {
   if (answerBuffer.length === 0) {
@@ -47,76 +282,57 @@ app.post("/process-answers", async (req, res) => {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
-You are a grading assistant. For each question, compare the student's answer with the correct answer.
-- Give a score: 1 if the answer is essentially correct, 0 if incorrect (no partials).
-- Provide short feedback.
-
-⚠️ IMPORTANT: Reply ONLY with a valid JSON array. Do not include markdown code fences or extra text.
-
-Format:
+You are a grading assistant.
+Return ONLY JSON array:
 [
-  {
-    "question": "string",
-    "userAnswer": "string",
-    "correctAnswer": "string",
-    "score": 0 or 1,
-    "feedback": "string"
-  }
+  {"question":"...","userAnswer":"...","correctAnswer":"...","score":0 or 1,"feedback":"..."}
 ]
 
 Here are the student answers:
-
-${answerBuffer
-  .map(
-    (item, idx) => `
+${answerBuffer.map((item, idx) => `
 Q${idx + 1}: ${item.question}
 Correct Answer: ${item.correctAnswer}
-Student Answer: ${item.userAnswer}`
-  )
-  .join("\n\n")}
+Student Answer: ${item.userAnswer}`).join("\n\n")}
 `;
 
-    const result = await model.generateContent(prompt);
-    let textResponse = result.response.text().trim();
-
-    // 🔥 Clean up any markdown fences Gemini might add
-    textResponse = textResponse.replace(/```json|```/g, "").trim();
-
-    let evaluations;
+    let result;
     try {
-      evaluations = JSON.parse(textResponse);
+      result = await model.generateContent(prompt);
     } catch (err) {
-      console.error("❌ JSON Parse Error, Gemini returned:", textResponse);
-
-      // ✅ Fallback: return dummy results so frontend can display
-      evaluations = answerBuffer.map((item) => ({
-        question: item.question,
-        userAnswer: item.userAnswer,
-        correctAnswer: item.correctAnswer,
-        score: 0,
-        feedback: "Could not evaluate due to parsing error.",
-      }));
+      if (err.status === 429) {
+        const fallback = answerBuffer.map((item) => ({
+          question: item.question,
+          userAnswer: item.userAnswer,
+          correctAnswer: item.correctAnswer,
+          score: 0,
+          feedback: "Evaluation failed: Gemini quota exceeded.",
+        }));
+        answerBuffer = [];
+        return res.status(429).json({ evaluations: fallback });
+      }
+      throw err;
     }
 
-    // Clear buffer after grading
-    answerBuffer = [];
+    const evaluations = safeParse(await result.response.text(), answerBuffer.map((item) => ({
+      question: item.question,
+      userAnswer: item.userAnswer,
+      correctAnswer: item.correctAnswer,
+      score: 0,
+      feedback: "Parsing failed.",
+    })));
 
+    answerBuffer = [];
     res.json({ evaluations });
   } catch (error) {
     console.error("Gemini Processing Error:", error);
-
-    // ✅ Fallback: return all answers with "error" feedback
     const fallback = answerBuffer.map((item) => ({
       question: item.question,
       userAnswer: item.userAnswer,
       correctAnswer: item.correctAnswer,
       score: 0,
-      feedback: "Evaluation failed due to Gemini error.",
+      feedback: "Evaluation failed.",
     }));
-
-    // clear buffer anyway
     answerBuffer = [];
-
     res.json({ evaluations: fallback });
   }
 });

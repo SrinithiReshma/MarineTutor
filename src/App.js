@@ -1,9 +1,10 @@
-// src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import CoursePage from "./components/CoursePage";
-
-import AdaptiveQuizPage from "./components/AdaptiveQuizPage"; // ✅ import new page
+import AdaptiveQuizPage from "./components/AdaptiveQuizPage";
+import RemediationPage from "./components/RemediationPage"; // ✅ import
+import MnemonicRemediationPage from "./components/MnemonicRemediationPage";
+import CombinedRemediationPage from "./components/CombinedRemediationPage";
 
 const App = () => {
   return (
@@ -13,10 +14,15 @@ const App = () => {
           {/* Default route (course page) */}
           <Route path="/" element={<CoursePage />} />
 
-         
-
-          {/* ✅ New adaptive quiz route */}
+          {/* Adaptive quiz route */}
           <Route path="/adaptive/:moduleId" element={<AdaptiveQuizPage />} />
+
+          {/* ✅ Remediation route */}
+          <Route path="/remediation" element={<RemediationPage />} />
+           {/* ✅ Remediation route */}
+          <Route path="/mnemonic-remediation" element={<MnemonicRemediationPage />} />
+           {/* ✅ Remediation route */}
+          <Route path="/combined-remediation" element={<CombinedRemediationPage />} />
         </Routes>
       </div>
     </Router>
