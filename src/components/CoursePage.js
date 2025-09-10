@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";  
+import React, { useEffect, useState } from "react";   
 import { Client, Databases, Query } from "appwrite";
 import { useNavigate } from "react-router-dom";
 import "./CoursePage.css";
@@ -50,8 +50,8 @@ function CoursePage({ moduleId = "1" }) {
   }, [moduleId]);
 
   if (loading)
-    return <p className="text-center text-lg text-gray-500 mt-10">Loading...</p>;
-  if (!module) return <p className="text-center text-red-500">No module found</p>;
+    return <p className="loading-text">Loading...</p>;
+  if (!module) return <p className="error-text">No module found</p>;
 
   const renderContent = (sections) => {
     if (!sections) return null;
@@ -79,28 +79,17 @@ function CoursePage({ moduleId = "1" }) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-8">
-      {/* Banner Section */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl p-10 mb-10">
-        <h1 className="text-4xl font-extrabold">{module.title}</h1>
-        <p className="mt-4 text-lg opacity-90 whitespace-pre-line">
-          {module.description}
-        </p>
-        {module.images && (
-          <img
-            src={module.images}
-            alt={module.title}
-            className="mt-6 w-full max-h-80 object-cover rounded-xl shadow-lg"
-          />
-        )}
+    <div className="course-page">
+      {/* Module Banner */}
+      <div className="module-banner">
+        <h1 className="module-title">{module.title}</h1>
+        <p className="module-description">{module.description}</p>
       </div>
 
       {/* Lessons Section */}
       {lessons.map((lesson, index) => {
         let sections = [];
-
         try {
-          // Parse JSON if content is string
           if (typeof lesson.content === "string") {
             const parsed = JSON.parse(lesson.content);
             sections = parsed.sections || [];
@@ -125,15 +114,16 @@ function CoursePage({ moduleId = "1" }) {
       })}
 
       {/* Go to Quiz Button */}
-      <div className="mt-12 text-center">
+      <div className="cta-container">
         <button
           onClick={() => navigate(`/adaptive/${moduleId}`)}
-          className="cta-btn bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700"
+          className="cta-btn"
         >
-          Go to Adaptive Quiz 🚀
+          Take Quiz
         </button>
       </div>
     </div>
   );
 }
+
 export default CoursePage;

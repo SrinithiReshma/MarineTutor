@@ -1,10 +1,10 @@
 // src/components/RemediationPage.jsx
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import "./RemediationPage.css";
 
 function RemediationPage() {
   const location = useLocation();
-  const navigate = useNavigate();
   const remediation = (location && location.state) || {};
   const {
     moduleId,
@@ -26,114 +26,122 @@ function RemediationPage() {
     practiceMCQs,
   } = remediation;
 
+  const cleanText = (text) => text?.replace(/\*\*/g, "").trim() || "";
+
   return (
-    <div className="min-h-screen bg-yellow-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold mb-4">
-          Remediation — Module {moduleId || "?"}
-        </h1>
+    <div className="remediation-page">
+      <div className="container">
+        <h1 className="page-title">Detailed Module {moduleId || "?"}</h1>
 
         {/* --- Classic remediation --- */}
         {explanation && (
-          <div className="bg-white p-6 rounded-2xl shadow-md prose">
-            <h2 className="text-xl font-semibold mb-2">Step-by-step Explanation</h2>
-            <div style={{ whiteSpace: "pre-wrap" }}>{explanation}</div>
-          </div>
+          <section cclassName="card step-by-step">
+            <h2>Step-by-step Explanation</h2>
+            
+          </section>
         )}
         {learningSteps && learningSteps.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Learning Steps</h2>
-            <ol className="list-decimal ml-6 space-y-1">
+          <section className="card">
+            <h2>Learning Steps</h2>
+            <ol>
               {learningSteps.map((s, i) => <li key={i}>{s}</li>)}
             </ol>
-          </div>
+          </section>
         )}
         {examples && examples.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Examples</h2>
-            <ul className="list-disc ml-6 space-y-3">
+          <section className="card">
+            <h2>Examples</h2>
+            <ul>
               {examples.map((ex, i) => (
                 <li key={i}><strong>{ex.title}</strong>: {ex.explain}</li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
         {practiceExercises && practiceExercises.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Practice Exercises</h2>
-            <ul className="list-disc ml-6 space-y-2">
+          <section className="card">
+            <h2>Practice Exercises</h2>
+            <ul>
               {practiceExercises.map((ex, i) => (
                 <li key={i}><strong>{ex.question}</strong> → {ex.answer}</li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
         {summary && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Summary</h2>
+          <section className="card">
+            <h2>Summary</h2>
             <p>{summary}</p>
-          </div>
+          </section>
         )}
 
         {/* --- Mnemonic remediation --- */}
         {easyExplanation && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Easy Explanation</h2>
+          <section className="card mnemonic-card">
+            <h2>Easy Explanation</h2>
             <p>{easyExplanation}</p>
-          </div>
+          </section>
         )}
         {mnemonics && mnemonics.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Mnemonics</h2>
-            <ul className="list-disc ml-6">{mnemonics.map((m, i) => <li key={i}>{m}</li>)}</ul>
-          </div>
+          <section className="mnemonic-section">
+            <h2>Mnemonics</h2>
+            {mnemonics.map((m, i) => (
+              <div key={i} className="mnemonic-box">{cleanText(m)}</div>
+            ))}
+          </section>
         )}
         {visualCues && visualCues.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Visual Cues</h2>
-            <ul className="list-disc ml-6">{visualCues.map((v, i) => <li key={i}>{v}</li>)}</ul>
-          </div>
+          <section className="visual-section">
+            <h2>Visual Cues</h2>
+            <ul>
+              {visualCues.map((v, i) => <li key={i}>{cleanText(v)}</li>)}
+            </ul>
+          </section>
         )}
         {flashcards && flashcards.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Flashcards</h2>
-            <ul className="list-disc ml-6">
+          <section className="flashcards-section">
+            <h2>Flashcards</h2>
+            <div className="flashcards-grid">
               {flashcards.map((f, i) => (
-                <li key={i}><strong>Q:</strong> {f.question} <br /><strong>A:</strong> {f.answer}</li>
+                <div key={i} className="flashcard">
+                  <p className="question"><strong>Q:</strong> {cleanText(f.question)}</p>
+                  <p className="answer"><strong>A:</strong> {cleanText(f.answer)}</p>
+                </div>
               ))}
-            </ul>
-          </div>
+            </div>
+          </section>
         )}
         {summaryPoints && summaryPoints.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Summary Points</h2>
-            <ul className="list-disc ml-6">{summaryPoints.map((s, i) => <li key={i}>{s}</li>)}</ul>
-          </div>
+          <section className="summary-points-section">
+            <h2>Summary Points</h2>
+            <ul>
+              {summaryPoints.map((s, i) => <li key={i}>{cleanText(s)}</li>)}
+            </ul>
+          </section>
         )}
 
         {/* --- Combined remediation --- */}
         {scenarioExamples && scenarioExamples.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Scenario Examples</h2>
-            <ul className="list-disc ml-6">
+          <section className="card">
+            <h2>Scenario Examples</h2>
+            <ul>
               {scenarioExamples.map((ex, i) => (
                 <li key={i}><strong>{ex.title}</strong>: {ex.explain}</li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
         {practiceMCQs && practiceMCQs.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl shadow-md">
-            <h2 className="text-xl font-semibold mb-2">Practice MCQs</h2>
-            <ul className="list-disc ml-6">
+          <section className="card">
+            <h2>Practice MCQs</h2>
+            <ul>
               {practiceMCQs.map((mcq, i) => (
                 <li key={i}><strong>{mcq.question}</strong> → {mcq.answer}</li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
 
-        {/* Fallback */}
         {!explanation &&
          !learningSteps &&
          !examples &&
@@ -146,7 +154,7 @@ function RemediationPage() {
          !summaryPoints &&
          !scenarioExamples &&
          !practiceMCQs && (
-          <p className="text-gray-600 italic">No remediation content available.</p>
+          <p className="fallback">No remediation content available.</p>
         )}
       </div>
     </div>

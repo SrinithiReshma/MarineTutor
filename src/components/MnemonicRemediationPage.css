@@ -1,0 +1,166 @@
+/* General page styles */ 
+/* General page styles */  
+.remediation-page {
+  background: linear-gradient(to right, #c6f6d5, #e6f4ea); /* stronger green gradient */
+  background-color: #e6f4ea; /* fallback solid shade */
+  font-family: 'Arial', sans-serif;
+  min-height: 100vh;
+  padding: 2rem;
+  color: #276749;
+  box-sizing: border-box;
+}
+
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Titles */
+.page-title {
+  text-align: center;
+  font-size: 2.8rem;
+  font-weight: bold;
+  margin-bottom: 2.5rem;
+  color: #276749;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #22543d;
+}
+
+/* Cards */
+.card {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-left: 6px solid #38a169;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+}
+
+/* Step-by-step Explanation */
+.step-by-step {
+  background-color: #c6f6d5; /* light green shade */
+  border-left: 6px solid #38a169;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.step-by-step * {
+  word-break: break-word;
+}
+
+/* Mnemonics */
+.mnemonic-section {
+  margin-bottom: 2rem;
+}
+
+.mnemonic-box {
+  background-color: #c6f6d5;
+  border-left: 6px solid #38a169;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-radius: 10px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+/* Visual Cues */
+.visual-section ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.visual-section li {
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.8rem;
+  border-left: 5px solid #38a169;
+  background-color: #e6f4ea;
+  border-radius: 6px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* Flashcards */
+.flashcards-section .flashcards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.flashcard {
+  background-color: #fff;
+  border-left: 6px solid #38a169;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  word-wrap: break-word;
+}
+
+.flashcard .question {
+  font-weight: bold;
+  color: #276749;
+  margin-bottom: 0.5rem;
+}
+
+.flashcard .answer {
+  line-height: 1.6;
+}
+
+/* Summary Points */
+.summary-points-section ul {
+  list-style-type: disc;
+  padding-left: 2rem;
+}
+
+.summary-points-section li {
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+}
+
+/* Fallback message */
+.fallback {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  margin-top: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .remediation-page {
+    padding: 1.5rem;
+  }
+
+  .page-title {
+    font-size: 2.2rem;
+  }
+
+  .card, .mnemonic-box, .step-by-step {
+    padding: 1.5rem;
+  }
+
+  .flashcards-section .flashcards-grid {
+    grid-template-columns: 1fr;
+  }
+}

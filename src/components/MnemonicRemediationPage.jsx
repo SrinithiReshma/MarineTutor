@@ -1,4 +1,4 @@
-// src/pages/MnemonicRemediationPage.jsx
+// src/pages/MnemonicRemediationPage.jsx 
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -9,6 +9,9 @@ function MnemonicRemediationPage() {
   const [remediation, setRemediation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Helper function to strip markdown-like characters (*)
+  const cleanText = (text) => text?.replace(/\*/g, "");
 
   useEffect(() => {
     if (!moduleId) {
@@ -44,51 +47,53 @@ function MnemonicRemediationPage() {
   if (!remediation) return <p className="p-4">No remediation data available.</p>;
 
   return (
-    <div className="min-h-screen bg-yellow-50 p-6">
-      <h1 className="text-2xl font-bold mb-4">Mnemonic Remediation</h1>
+    <div className="remediation-page">
+      <div className="container">
+        <h1 className="page-title">Memory Toolkit</h1>
 
-      {/* Mnemonics */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Mnemonics</h2>
-        <ul className="list-disc pl-6">
+        {/* Mnemonics */}
+        <section className="mnemonic-section">
+          <h2>Mnemonics</h2>
           {remediation.mnemonics?.map((m, i) => (
-            <li key={i}>{m}</li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Visual Cues */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Visual Cues</h2>
-        <ul className="list-disc pl-6">
-          {remediation.visualCues?.map((v, i) => (
-            <li key={i}>{v}</li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Summary */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Summary Points</h2>
-        <ul className="list-disc pl-6">
-          {remediation.summaryPoints?.map((s, i) => (
-            <li key={i}>{s}</li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Flashcards */}
-      <section>
-        <h2 className="text-xl font-semibold mb-2">Flashcards</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {remediation.flashcards?.map((fc, i) => (
-            <div key={i} className="p-4 bg-white shadow rounded-xl">
-              <p className="font-medium">Q: {fc.question}</p>
-              <p className="text-gray-700 mt-2">A: {fc.answer}</p>
+            <div key={i} className="mnemonic-box">
+              {cleanText(m)}
             </div>
           ))}
-        </div>
-      </section>
+        </section>
+
+        {/* Visual Cues */}
+        <section className="visual-section">
+          <h2>Visual Cues</h2>
+          <ul>
+            {remediation.visualCues?.map((v, i) => (
+              <li key={i}>{cleanText(v)}</li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Summary */}
+        <section className="summary-points-section">
+          <h2>Summary Points</h2>
+          <ul>
+            {remediation.summaryPoints?.map((s, i) => (
+              <li key={i}>{cleanText(s)}</li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Flashcards */}
+        <section className="flashcards-section">
+          <h2>Flashcards</h2>
+          <div className="flashcards-grid">
+            {remediation.flashcards?.map((fc, i) => (
+              <div key={i} className="flashcard">
+                <p className="question">Q: {cleanText(fc.question)}</p>
+                <p className="answer">A: {cleanText(fc.answer)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

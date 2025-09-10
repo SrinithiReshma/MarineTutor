@@ -69,36 +69,72 @@ app.post("/generate-combined-remediation", async (req, res) => {
     const moduleContent =
       doc.content || doc.body || doc.description || JSON.stringify(doc);
 
-    // Prompts
     const remediationPrompt = `
-You are an expert tutor. A student struggled in Module ${moduleId}.
-Generate a remediation package.
-Return ONLY JSON:
+You are an expert tutor and instructional designer. 
+A student has failed Module ${moduleId} and does not understand it.
+Generate a comprehensive remediation package that thoroughly explains all concepts so the student can understand and pass.
+
+Requirements:
+1. in explaination Explain every concept in **detailed, clear language** assuming the student knows very little without leaving a single line from the content.
+2. in examples Include **multiple real-life examples** or scenarios for each concept.
+3. Include **practice exercises** with answers for reinforcement.
+4. Break content into **structured web-ready JSON** for display.
+
+Return ONLY JSON with this structure:
+
 {
   "moduleId": "${moduleId}",
-  "explanation": "...",
-  "learningSteps": ["..."],
-  "examples": [{"title":"...","explain":"..."}],
-  "practiceExercises": [{"question":"...","answer":"..."}],
-  "summary": "..."
+  "explanation": "...",                    // full detailed explanation
+  "examples": [                            // real-life examples
+    {"title":"...", "explain":"..."},
+    {"title":"...", "explain":"..."}
+  ],
+  "practiceExercises": [                   // Q&A exercises
+    {"question":"...", "answer":"...", "hint":"optional hint if needed"}
+  ],
+  "webContent": [                          // for webpage rendering
+    {"type":"heading","text":"..."},
+    {"type":"paragraph","text":"..."},
+    {"type":"list","items":["...","..."]}
+  ]
 }
+
 Module content:
 ${moduleContent}
 `;
 
-    const mnemonicPrompt = `
+const mnemonicPrompt = `
 You are an expert memory coach.
-Return ONLY JSON:
+Generate a **mnemonic package** for Module ${moduleId} to help a student who failed.
+
+Requirements:
+1. Include **mnemonics** and other aids to help them memorize content.
+2. Provide **flashcards** with Q&A.
+4. Ensure content is **fun, memorable, and easy to recall**.
+5. Format JSON for webpage display.
+
+Return ONLY JSON with this structure:
+
 {
   "moduleId": "${moduleId}",
-  "mnemonics": ["..."],
-  "visualCues": ["..."],
-  "flashcards": [{"question":"...","answer":"..."}],
-  "summaryPoints": ["..."]
+  "mnemonics": [
+    {"mnemonic":"...", "description":"...","what it stands for":"..."}
+  ],
+  "flashcards": [
+    {"question":"...", "answer":"..."}
+  ],
+  "webContent": [
+    {"type":"heading","text":"..."},
+    {"type":"paragraph","text":"..."},
+    {"type":"list","items":["...","..."]}
+  ]
 }
+
 Module content:
 ${moduleContent}
 `;
+
+
 
     const model = genA.getGenerativeModel({ model: "gemini-2.0-flash" });
 
@@ -153,6 +189,7 @@ app.post("/save-answer", (req, res) => {
  * 🔹 Route 3: Generate Conceptual Remediation
  */
 app.post("/generate-remediation", async (req, res) => {
+  print('entered theory module');
   const { moduleId } = req.body;
   if (!moduleId) return res.status(400).json({ error: "moduleId is required" });
 
@@ -174,12 +211,12 @@ app.post("/generate-remediation", async (req, res) => {
     // ✅ Prepare Gemini model & prompt inside try
     const model = genA.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = `
-You are an expert tutor.
+You are an expert tutor. In explaination take each topic in a simple words and in example give many example and scenarios to explain them
+in practice exerceises give application/scenario based questions and in summary give tips how to learn them
 Return ONLY JSON with:
 {
   "moduleId": "${moduleId}",
   "explanation": "...",
-  "learningSteps": ["..."],
   "examples": [{"title":"...","explain":"..."}],
   "practiceExercises": [{"question":"...","answer":"..."}],
   "summary": "..."
@@ -239,12 +276,11 @@ app.post("/generate-mnemonic-remediation", async (req, res) => {
 
     const model = genA.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = `
-You are an expert memory coach.
+You are an expert memory coach.give mnemonics and explaination
 Return ONLY JSON with:
 {
   "moduleId": "${moduleId}",
   "mnemonics": ["..."],
-  "visualCues": ["..."],
   "flashcards": [{"question":"...","answer":"..."}],
   "summaryPoints": ["..."]
 }

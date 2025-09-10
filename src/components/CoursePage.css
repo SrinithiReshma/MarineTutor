@@ -1,83 +1,77 @@
-/* General Page Styling */
+/* General Page */
 .course-page {
   max-width: 1200px;
+  width: 95%;
   margin: 0 auto;
-  padding: 2rem;
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
-  background: linear-gradient(to right, #d9f0e5, #f0fff4); /* Green gradient background */
+  padding: 3rem 1.5rem;
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(to bottom, #e6f7f0, #ffffff);
+  color: #2c3e50;
 }
 
-/* Loading & Error Text */
-.loading-text,
-.error-text {
+/* Loading & Error */
+.loading-text, .error-text {
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   margin-top: 3rem;
-  color: #555;
+  font-weight: 500;
 }
 
-.error-text {
-  color: #e74c3c;
-}
+.error-text { color: #e74c3c; }
 
-/* Banner Card */
-.banner-card {
-  background: linear-gradient(90deg, #276749, #68d391);
+/* Module Banner */
+.module-banner {
+  background: linear-gradient(135deg, #38a169, #68d391);
   color: white;
-  border-radius: 1rem;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-  padding: 2.5rem;
-  margin-bottom: 2.5rem;
+  border-radius: 2rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
 }
 
-.banner-title {
-  font-size: 2.5rem;
-  font-weight: 700;
+.module-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  line-height: 1.2;
 }
 
-.banner-description {
-  margin-top: 1rem;
-  font-size: 1.15rem;
-  line-height: 1.7;
-  white-space: pre-line;
-  opacity: 0.9;
+.module-description {
+  font-size: 1.25rem;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.8;
+  opacity: 0.95;
 }
 
-.banner-image {
-  margin-top: 1.5rem;
-  width: 100%;
-  max-height: 320px;
-  object-fit: cover;
-  border-radius: 1rem;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-}
-
-/* Card-style text blocks for lessons */
+/* Lessons */
 .lesson-card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 25px;
-  box-shadow: 0px 8px 25px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease-in-out;
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .lesson-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0px 12px 30px rgba(0,0,0,0.15);
+  transform: translateY(-7px);
+  box-shadow: 0 15px 50px rgba(0,0,0,0.15);
 }
 
 .lesson-header {
   display: flex;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .lesson-badge {
-  width: 45px;
-  height: 45px;
-  background-color: #c6f6d5; /* soft green */
+  width: 50px;
+  height: 50px;
+  background: #c6f6d5;
   color: #276749;
   font-weight: 700;
   display: flex;
@@ -85,61 +79,62 @@
   align-items: center;
   border-radius: 50%;
   margin-right: 15px;
+  font-size: 1.2rem;
 }
 
 .lesson-title {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-/* Card-style text inside lesson content */
-.lesson-content > * {
-  background-color: #f9fff9; /* subtle light card background */
-  border-radius: 8px;
-  padding: 12px 15px;
-  margin-bottom: 12px;
-  box-shadow: 0px 3px 8px rgba(0,0,0,0.05);
-}
-
-/* Headings inside cards */
-.lesson-heading {
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   font-weight: 700;
-  margin-top: 0;
-  margin-bottom: 0.8rem;
   color: #2c3e50;
-  border-bottom: 2px solid #e5e7eb;
-  padding-bottom: 0.25rem;
+  margin-top: 0.3rem;
 }
 
-/* Subheadings */
+/* Lesson content blocks */
+.lesson-content > * {
+  background: #f0fff4;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  text-align: left;
+}
+
+/* Headings */
+.lesson-heading {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #276749;
+  border-bottom: 2px solid #c6f6d5;
+  padding-bottom: 0.3rem;
+}
+
 .lesson-subheading {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-top: 0;
-  margin-bottom: 0.6rem;
-  color: #34495e;
+  margin-bottom: 0.8rem;
+  color: #2f855a;
 }
 
 /* Paragraphs */
 .lesson-paragraph {
-  font-size: 1rem;
-  line-height: 1.7;
-  margin-bottom: 0.8rem;
-  color: #555;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+  color: #2c3e50;
 }
 
 /* Lists */
 .lesson-list {
   list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 0.8rem;
+  padding-left: 2rem;
+  margin-bottom: 1rem;
 }
 
 .lesson-list li {
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
+  margin-bottom: 0.6rem;
+  line-height: 1.7;
+  font-size: 1.05rem;
 }
 
 /* CTA Button */
@@ -149,19 +144,19 @@
 }
 
 .cta-btn {
-  padding: 0.85rem 2.5rem;
-  font-size: 1.15rem;
-  border-radius: 0.75rem;
-  background-color: #38a169; /* green */
+  padding: 1rem 3rem;
+  font-size: 1.2rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #38a169, #68d391);
   color: white;
   border: none;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.25s ease;
+  font-weight: 700;
+  transition: all 0.3s ease;
 }
 
 .cta-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(56, 161, 105, 0.35);
-  background-color: #2f855a;
+  box-shadow: 0 10px 25px rgba(56, 161, 105, 0.35);
+  background: linear-gradient(135deg, #2f855a, #38a169);
 }

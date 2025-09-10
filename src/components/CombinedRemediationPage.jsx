@@ -1,6 +1,9 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+// Helper to clean unwanted characters like '**'
+const cleanText = (text) => text?.replace(/\*\*/g, "").trim();
+
 function CombinedRemediationPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -9,108 +12,107 @@ function CombinedRemediationPage() {
 
   if (!moduleId) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-red-600">
+      <div className="fallback-container">
         <p>❌ No moduleId provided.</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
-        >
-          Go Back
-        </button>
+        <button onClick={() => navigate(-1)}>Go Back</button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-yellow-50 p-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        📘 Combined Remediation for Module {moduleId}
-      </h1>
+    <div className="combined-page">
+      <div className="container">
+        <h1 className="page-title">
+          Detailed module {moduleId}
+        </h1>
 
-      {/* Remediation Section */}
-      {remediation && (
-        <div className="bg-white shadow-md rounded-2xl p-6 mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Remediation</h2>
-          <p className="mb-4">{remediation.explanation || "No explanation available."}</p>
+        {/* Remediation Section */}
+        {remediation && (
+          <div className="card">
+            <h2 className="section-title">Detailed Remediation</h2>
+            <p>{cleanText(remediation.explanation)}</p>
 
-          {remediation.learningSteps?.length > 0 && (
-            <div className="mb-4">
-              <h3 className="font-bold">Learning Steps:</h3>
-              <ul className="list-disc pl-6">
-                {remediation.learningSteps.map((step, i) => (
-                  <li key={i}>{step}</li>
+            {remediation.examples?.length > 0 && (
+              <div className="section-block">
+                <h3>Examples:</h3>
+                <ul>
+                  {remediation.examples.map((ex, i) => (
+                    <li key={i}>
+                      <strong>{cleanText(ex.title)}:</strong> {cleanText(ex.explain)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {remediation.practiceExercises?.length > 0 && (
+              <div className="section-block">
+                <h3>Practice Exercises:</h3>
+                <ul>
+                  {remediation.practiceExercises.map((ex, i) => (
+                    <li key={i}>
+                      <strong>Q:</strong> {cleanText(ex.question)} <br />
+                      <strong>A:</strong> {cleanText(ex.answer)}
+                      {ex.hint && <p><em>Hint:</em> {cleanText(ex.hint)}</p>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {remediation.summary && (
+              <div className="section-block">
+                <h3>Summary:</h3>
+                <p>{cleanText(remediation.summary)}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Mnemonics Section */}
+        {mnemonicRemediation && (
+          <div className="mnemonic-card">
+            <h2 className="section-title">Mnemonic Aids</h2>
+
+            {mnemonicRemediation.mnemonics?.length > 0 && (
+              <div className="mnemonics">
+                {mnemonicRemediation.mnemonics.map((m, i) => (
+                  <div key={i} className="mnemonic-box">{cleanText(m.mnemonic || m)}</div>
                 ))}
-              </ul>
-            </div>
-          )}
+              </div>
+            )}
 
-          {remediation.examples?.length > 0 && (
-            <div className="mb-4">
-              <h3 className="font-bold">Examples:</h3>
-              <ul className="list-disc pl-6">
-                {remediation.examples.map((ex, i) => (
-                  <li key={i}>
-                    <strong>{ex.title}:</strong> {ex.explain}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {mnemonicRemediation.flashcards?.length > 0 && (
+              <div className="section-block">
+                <h3>Flashcards:</h3>
+                <ul>
+                  {mnemonicRemediation.flashcards.map((f, i) => (
+                    <li key={i}>
+                      <strong>Q:</strong> {cleanText(f.question)} <br />
+                      <strong>A:</strong> {cleanText(f.answer)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-          {remediation.practiceExercises?.length > 0 && (
-            <div className="mb-4">
-              <h3 className="font-bold">Practice Exercises:</h3>
-              <ul className="list-disc pl-6">
-                {remediation.practiceExercises.map((ex, i) => (
-                  <li key={i}>
-                    <strong>Q:</strong> {ex.question} <br />
-                    <strong>A:</strong> {ex.answer}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {mnemonicRemediation.summaryPoints?.length > 0 && (
+              <div className="section-block">
+                <h3>Summary Points:</h3>
+                <ul>
+                  {mnemonicRemediation.summaryPoints.map((s, i) => (
+                    <li key={i}>{cleanText(s)}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-          {remediation.summary && (
-            <div className="mb-4">
-              <h3 className="font-bold">Summary:</h3>
-              <p>{remediation.summary}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Mnemonic Remediation Section */}
-      {mnemonicRemediation && (
-        <div className="bg-white shadow-md rounded-2xl p-6">
-          <h2 className="text-2xl font-semibold mb-4">Mnemonic Remediation</h2>
-
-          {mnemonicRemediation.mnemonics?.length > 0 ? (
-            <ul className="list-disc pl-6 mb-4">
-              {mnemonicRemediation.mnemonics.map((m, i) => (
-                <li key={i}>{m}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>No mnemonics generated.</p>
-          )}
-
-          {mnemonicRemediation.summaryPoints?.length > 0 && (
-            <div>
-              <h3 className="font-bold">Summary Points:</h3>
-              <ul className="list-disc pl-6">
-                {mnemonicRemediation.summaryPoints.map((s, i) => (
-                  <li key={i}>{s}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {mnemonicRemediation.error && (
-            <p className="text-red-500 mt-4">⚠️ {mnemonicRemediation.error}</p>
-          )}
-        </div>
-      )}
+            {mnemonicRemediation.error && (
+              <p className="error">⚠ {mnemonicRemediation.error}</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

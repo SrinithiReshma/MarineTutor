@@ -1,9 +1,12 @@
 {
-  "name": "marine-tutor-backend",
+  "name": "marine-tutor",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
+    "start-backend": "node server.js",
+    "start-frontend": "cd frontend && npm start",
+    "install-frontend": "cd frontend && npm install"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -11,5 +14,8 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "node-appwrite": "^18.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
   }
 }

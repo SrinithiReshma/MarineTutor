@@ -1,4 +1,4 @@
-.quiz-page {
+.quiz-page { 
   min-height: 100vh;
   padding: 2rem;
   background: linear-gradient(to right, #d9f0e5, #f0fff4);
@@ -119,6 +119,7 @@
   background-color: #f0fff4;
   margin-top: 0.75rem;
 }
+
 .remediation-popup-overlay {
   position: fixed;
   top: 0;
@@ -141,16 +142,26 @@
   width: 90%;
 }
 
-.remedial-btn {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background: #6c63ff;
+.remedial-btn,
+.remediation-btn {
+  padding: 0.85rem 2.5rem;
+  font-size: 1.15rem;
+  border-radius: 0.75rem;
+  background-color: #38a169; /* green */
   color: white;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 
-.remedial-btn:hover {
+.remedial-btn:hover,
+.remediation-btn:hover {
   background: #5a52d4;
+  transform: translateY(-2px);
+}
+
+.remediation-button-container {
+  display: flex;
+  justify-content: center;
 }
