@@ -69,72 +69,61 @@ app.post("/generate-combined-remediation", async (req, res) => {
     const moduleContent =
       doc.content || doc.body || doc.description || JSON.stringify(doc);
 
+    // ✅ FIXED Remediation Prompt (Detailed tutoring content)
     const remediationPrompt = `
 You are an expert tutor and instructional designer. 
 A student has failed Module ${moduleId} and does not understand it.
 Generate a comprehensive remediation package that thoroughly explains all concepts so the student can understand and pass.
 
 Requirements:
-1. in explaination Explain every concept in **detailed, clear language** assuming the student knows very little without leaving a single line from the content.
-2. in examples Include **multiple real-life examples** or scenarios for each concept.
-3. Include **practice exercises** with answers for reinforcement.
-4. Break content into **structured web-ready JSON** for display.
-
-Return ONLY JSON with this structure:
+1. **Explanation**: Explain every concept in clear, detailed language assuming the student knows very little.
+2. **Examples**: Provide multiple real-life examples or scenarios for each concept.
+3. **Practice Exercises**: Include practice exercises with answers (and hints if helpful).
+4. **Summary**: Give a short summary at the end.
+5. Return ONLY JSON.
 
 {
   "moduleId": "${moduleId}",
-  "explanation": "...",                    // full detailed explanation
-  "examples": [                            // real-life examples
-    {"title":"...", "explain":"..."},
-    {"title":"...", "explain":"..."}
+  "explanation": "...",
+  "examples": [
+    {"title": "...", "explain": "..."}
   ],
-  "practiceExercises": [                   // Q&A exercises
-    {"question":"...", "answer":"...", "hint":"optional hint if needed"}
+  "practiceExercises": [
+    {"question": "...", "answer": "...", "hint": "..."}
   ],
-  "webContent": [                          // for webpage rendering
-    {"type":"heading","text":"..."},
-    {"type":"paragraph","text":"..."},
-    {"type":"list","items":["...","..."]}
-  ]
+  "summary": "..."
 }
 
 Module content:
 ${moduleContent}
 `;
 
-const mnemonicPrompt = `
+    // ✅ Mnemonic Prompt (memory aids only)
+    const mnemonicPrompt = `
 You are an expert memory coach.
-Generate a **mnemonic package** for Module ${moduleId} to help a student who failed.
+Generate a mnemonic package for Module ${moduleId} to help a student who failed.
 
 Requirements:
-1. Include **mnemonics** and other aids to help them memorize content.
-2. Provide **flashcards** with Q&A.
-4. Ensure content is **fun, memorable, and easy to recall**.
-5. Format JSON for webpage display.
-
-Return ONLY JSON with this structure:
+1. Provide **mnemonics** with full form + explanation.
+2. Provide **flashcards** (Q&A).
+3. Add **summary points** (bullet form).
+4. Make content fun, memorable, and easy to recall.
+5. Return ONLY JSON.
 
 {
   "moduleId": "${moduleId}",
   "mnemonics": [
-    {"mnemonic":"...", "description":"...","what it stands for":"..."}
+    {"mnemonic":"...", "description":"...", "what it stands for":"..."}
   ],
   "flashcards": [
     {"question":"...", "answer":"..."}
   ],
-  "webContent": [
-    {"type":"heading","text":"..."},
-    {"type":"paragraph","text":"..."},
-    {"type":"list","items":["...","..."]}
-  ]
+  "summaryPoints": ["..."]
 }
 
 Module content:
 ${moduleContent}
 `;
-
-
 
     const model = genA.getGenerativeModel({ model: "gemini-2.0-flash" });
 
@@ -276,21 +265,25 @@ app.post("/generate-mnemonic-remediation", async (req, res) => {
 
     const model = genA.getGenerativeModel({ model: "gemini-2.0-flash" });
     const prompt = `
-You are an expert memory coach.give mnemonics and explaination
+You are an expert memory coach. Give mnemonics with full form and explanation.
 Return ONLY JSON with:
 {
   "moduleId": "${moduleId}",
-  "mnemonics": ["..."],
+  "mnemonics": [
+    {"mnemonic":"...","description":"...","what it stands for":"..."}
+  ],
   "flashcards": [{"question":"...","answer":"..."}],
   "summaryPoints": ["..."]
 }
 Module content:
 ${moduleContent}
-    `;
+`;
+
 
     let result;
     try {
       result = await model.generateContent(prompt);
+      console.log.print(result)
     } catch (err) {
       if (err.status === 429) {
         return res.status(429).json({ moduleId, error: "Gemini quota exceeded. Try again later." });

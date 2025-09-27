@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";   
 import { Client, Databases, Query } from "appwrite";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./CoursePage.css";
 
 const client = new Client()
@@ -13,7 +13,8 @@ const DATABASE_ID = "6894724e002dc704b552";
 const MODULES_COLLECTION_ID = "modules";
 const LESSONS_COLLECTION_ID = "lessons";
 
-function CoursePage({ moduleId = "1" }) {
+function CoursePage() {
+  const { moduleId } = useParams(); // ✅ get moduleId from URL
   const [module, setModule] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);

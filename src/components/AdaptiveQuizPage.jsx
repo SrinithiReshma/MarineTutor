@@ -57,12 +57,19 @@ function AdaptiveQuizPage() {
         };
 
         // Function to pick 2 easy, 2 medium, 2 hard
-        const pickByDifficulty = (arr) => {
-          const easy = pickRandom(arr.filter((q) => q.tag === "easy"), 2);
-          const medium = pickRandom(arr.filter((q) => q.tag === "medium"), 2);
-          const hard = pickRandom(arr.filter((q) => q.tag === "hard"), 2);
-          return [...easy, ...medium, ...hard];
-        };
+       const pickByDifficulty = (arr) => {
+  const easy = pickRandom(arr.filter((q) => q.tag?.toLowerCase() === "easy"), 2);
+  const medium = pickRandom(arr.filter((q) => q.tag?.toLowerCase() === "medium"), 2);
+  const hard = pickRandom(arr.filter((q) => q.tag?.toLowerCase() === "hard"), 2);
+
+  // Fallback: if some category is empty, pick extra from others
+  const selected = [...easy, ...medium, ...hard];
+  if (selected.length < 6) {
+    const remaining = arr.filter((q) => !selected.includes(q));
+    selected.push(...pickRandom(remaining, 6 - selected.length));
+  }
+  return selected;
+};
 
         const selectedMcqs = pickByDifficulty(mcqs);
         const selectedDescs = pickByDifficulty(descs);
@@ -170,8 +177,10 @@ function AdaptiveQuizPage() {
       } else if (descPercent < REMEDIATION_THRESHOLD) {
         setRemediationRoute("/remediation");
       } else {
-        setRemediationRoute(null); // No remediation needed
-      }
+  const nextModuleId = parseInt(moduleId) + 1;
+  navigate(`/course/${nextModuleId}`);
+}
+
     } catch (err) {
       console.error("Error submitting quiz:", err);
     }

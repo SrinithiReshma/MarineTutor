@@ -1,10 +1,11 @@
 // src/components/RemediationPage.jsx
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./RemediationPage.css";
 
 function RemediationPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const remediation = (location && location.state) || {};
   const {
     moduleId,
@@ -35,16 +36,16 @@ function RemediationPage() {
 
         {/* --- Classic remediation --- */}
         {explanation && (
-          <section cclassName="card step-by-step">
+          <section className="card step-by-step">
             <h2>Step-by-step Explanation</h2>
-            
+            <p>{cleanText(explanation)}</p>
           </section>
         )}
         {learningSteps && learningSteps.length > 0 && (
           <section className="card">
             <h2>Learning Steps</h2>
             <ol>
-              {learningSteps.map((s, i) => <li key={i}>{s}</li>)}
+              {learningSteps.map((s, i) => <li key={i}>{cleanText(s)}</li>)}
             </ol>
           </section>
         )}
@@ -53,7 +54,7 @@ function RemediationPage() {
             <h2>Examples</h2>
             <ul>
               {examples.map((ex, i) => (
-                <li key={i}><strong>{ex.title}</strong>: {ex.explain}</li>
+                <li key={i}><strong>{cleanText(ex.title)}</strong>: {cleanText(ex.explain)}</li>
               ))}
             </ul>
           </section>
@@ -63,7 +64,7 @@ function RemediationPage() {
             <h2>Practice Exercises</h2>
             <ul>
               {practiceExercises.map((ex, i) => (
-                <li key={i}><strong>{ex.question}</strong> → {ex.answer}</li>
+                <li key={i}><strong>{cleanText(ex.question)}</strong> → {cleanText(ex.answer)}</li>
               ))}
             </ul>
           </section>
@@ -71,7 +72,7 @@ function RemediationPage() {
         {summary && (
           <section className="card">
             <h2>Summary</h2>
-            <p>{summary}</p>
+            <p>{cleanText(summary)}</p>
           </section>
         )}
 
@@ -79,7 +80,7 @@ function RemediationPage() {
         {easyExplanation && (
           <section className="card mnemonic-card">
             <h2>Easy Explanation</h2>
-            <p>{easyExplanation}</p>
+            <p>{cleanText(easyExplanation)}</p>
           </section>
         )}
         {mnemonics && mnemonics.length > 0 && (
@@ -126,7 +127,7 @@ function RemediationPage() {
             <h2>Scenario Examples</h2>
             <ul>
               {scenarioExamples.map((ex, i) => (
-                <li key={i}><strong>{ex.title}</strong>: {ex.explain}</li>
+                <li key={i}><strong>{cleanText(ex.title)}</strong>: {cleanText(ex.explain)}</li>
               ))}
             </ul>
           </section>
@@ -136,7 +137,7 @@ function RemediationPage() {
             <h2>Practice MCQs</h2>
             <ul>
               {practiceMCQs.map((mcq, i) => (
-                <li key={i}><strong>{mcq.question}</strong> → {mcq.answer}</li>
+                <li key={i}><strong>{cleanText(mcq.question)}</strong> → {cleanText(mcq.answer)}</li>
               ))}
             </ul>
           </section>
@@ -156,6 +157,28 @@ function RemediationPage() {
          !practiceMCQs && (
           <p className="fallback">No remediation content available.</p>
         )}
+
+        {/* --- Done Button --- */}
+        <div className="done-button-container" style={{ marginTop: "20px", textAlign: "center" }}>
+          <button
+            className="done-btn"
+            style={{
+              padding: "10px 20px",
+              fontSize: "16px",
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+            onClick={() =>
+              navigate(`/adaptive/${moduleId}`, { state: { fromRemediation: true } })
+            }
+          >
+            ✅ Done
+          </button>
+        </div>
+
       </div>
     </div>
   );

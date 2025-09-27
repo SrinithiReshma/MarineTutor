@@ -1,14 +1,24 @@
-import React from "react";
+// src/pages/CombinedRemediationPage.jsx
+import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Helper to clean unwanted characters like '**'
-const cleanText = (text) => text?.replace(/\*\*/g, "").trim();
+const cleanText = (text) =>
+  typeof text === "string" ? text.replace(/\*\*/g, "").trim() : "";
 
 function CombinedRemediationPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const { moduleId, remediation, mnemonicRemediation } = location.state || {};
+
+  useEffect(() => {
+    console.log("📦 Retrieved Content:", {
+      moduleId,
+      remediation,
+      mnemonicRemediation,
+    });
+  }, [moduleId, remediation, mnemonicRemediation]);
 
   if (!moduleId) {
     return (
@@ -22,9 +32,7 @@ function CombinedRemediationPage() {
   return (
     <div className="combined-page">
       <div className="container">
-        <h1 className="page-title">
-          Detailed module {moduleId}
-        </h1>
+        <h1 className="page-title">Detailed module {moduleId}</h1>
 
         {/* Remediation Section */}
         {remediation && (
@@ -38,7 +46,8 @@ function CombinedRemediationPage() {
                 <ul>
                   {remediation.examples.map((ex, i) => (
                     <li key={i}>
-                      <strong>{cleanText(ex.title)}:</strong> {cleanText(ex.explain)}
+                      <strong>{cleanText(ex.title)}:</strong>{" "}
+                      {cleanText(ex.explain)}
                     </li>
                   ))}
                 </ul>
@@ -48,15 +57,19 @@ function CombinedRemediationPage() {
             {remediation.practiceExercises?.length > 0 && (
               <div className="section-block">
                 <h3>Practice Exercises:</h3>
-                <ul>
+                <div className="flashcards-grid">
                   {remediation.practiceExercises.map((ex, i) => (
-                    <li key={i}>
-                      <strong>Q:</strong> {cleanText(ex.question)} <br />
-                      <strong>A:</strong> {cleanText(ex.answer)}
-                      {ex.hint && <p><em>Hint:</em> {cleanText(ex.hint)}</p>}
-                    </li>
+                    <div key={i} className="flashcard">
+                      <p className="question">Q: {cleanText(ex.question)}</p>
+                      <p className="answer">A: {cleanText(ex.answer)}</p>
+                      {ex.hint && (
+                        <p className="hint">
+                          <em>Hint:</em> {cleanText(ex.hint)}
+                        </p>
+                      )}
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
 
@@ -77,7 +90,18 @@ function CombinedRemediationPage() {
             {mnemonicRemediation.mnemonics?.length > 0 && (
               <div className="mnemonics">
                 {mnemonicRemediation.mnemonics.map((m, i) => (
-                  <div key={i} className="mnemonic-box">{cleanText(m.mnemonic || m)}</div>
+                  <div key={i} className="mnemonic-box">
+                    <p>
+                      <strong>{cleanText(m.mnemonic || m)}</strong>
+                    </p>
+                    {m["what it stands for"] && (
+                      <p>
+                        <em>Stands for:</em>{" "}
+                        {cleanText(m["what it stands for"])}
+                      </p>
+                    )}
+                    {m.description && <p>{cleanText(m.description)}</p>}
+                  </div>
                 ))}
               </div>
             )}
@@ -85,14 +109,14 @@ function CombinedRemediationPage() {
             {mnemonicRemediation.flashcards?.length > 0 && (
               <div className="section-block">
                 <h3>Flashcards:</h3>
-                <ul>
+                <div className="flashcards-grid">
                   {mnemonicRemediation.flashcards.map((f, i) => (
-                    <li key={i}>
-                      <strong>Q:</strong> {cleanText(f.question)} <br />
-                      <strong>A:</strong> {cleanText(f.answer)}
-                    </li>
+                    <div key={i} className="flashcard">
+                      <p className="question">Q: {cleanText(f.question)}</p>
+                      <p className="answer">A: {cleanText(f.answer)}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
 
@@ -112,6 +136,32 @@ function CombinedRemediationPage() {
             )}
           </div>
         )}
+
+        {/* Done Button */}
+        <div
+          className="done-button-container"
+          style={{ marginTop: "20px", textAlign: "center" }}
+        >
+          <button
+            className="done-btn"
+            style={{
+              padding: "10px 20px",
+              fontSize: "16px",
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+            onClick={() =>
+              navigate(`/adaptive/${moduleId}`, {
+                state: { fromRemediation: true },
+              })
+            }
+          >
+            ✅ Done
+          </button>
+        </div>
       </div>
     </div>
   );
