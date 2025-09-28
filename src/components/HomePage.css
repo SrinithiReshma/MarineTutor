@@ -3,41 +3,44 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
-  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #e6f7f0, #d9f0e8); /* Greenish gradient */
+  font-family: 'Poppins', Arial, sans-serif;
 }
 
 .hero-section {
   text-align: center;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  padding: 2.5rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.1);
 }
 
 .hero-title {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: #1f2937;
+  color: #276749; /* Dark green */
+  font-weight: 700;
 }
 
 .hero-subtitle {
   font-size: 1.2rem;
   margin-bottom: 2rem;
-  color: #4b5563;
+  color: #2f855a; /* Medium green */
 }
 
 .start-btn {
-  background-color: #2563eb;
+  background-color: #38a169; /* Green */
   color: white;
   padding: 0.8rem 2rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.3s;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.3s;
 }
 
 .start-btn:hover {
-  background-color: #1d4ed8;
+  background-color: #2f855a;
+  transform: scale(1.05);
 }

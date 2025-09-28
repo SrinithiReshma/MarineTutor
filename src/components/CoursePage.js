@@ -122,6 +122,14 @@ function CoursePage() {
         >
           Take Quiz
         </button>
+         {/* New button to view mindmaps */}
+  <button
+    onClick={() => navigate(`/mindmaps/${moduleId}`)}
+    className="cta-btn"
+    style={{ marginLeft: "1rem" }}
+  >
+    View Mindmaps
+  </button>
       </div>
     </div>
   );

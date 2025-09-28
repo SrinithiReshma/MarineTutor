@@ -1,0 +1,89 @@
+/* General Page */
+.mindmap-container {
+  max-width: 1200px;
+  width: 95%;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(to bottom, #e6f7f0, #ffffff);
+  color: #2c3e50;
+}
+
+/* Loading & Error */
+.loading-text, .error-text {
+  text-align: center;
+  font-size: 1.3rem;
+  margin-top: 3rem;
+  font-weight: 500;
+}
+
+.error-text {
+  color: #e74c3c;
+}
+
+/* Page Title */
+.mindmap-container h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #276749;
+}
+
+/* Table Styling */
+.mindmap-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  background: #ffffff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.mindmap-table th, .mindmap-table td {
+  padding: 15px 20px;
+  text-align: left;
+  font-size: 1.05rem;
+  color: #2c3e50;
+}
+
+.mindmap-table th {
+  background: linear-gradient(135deg, #38a169, #68d391);
+  color: white;
+  font-weight: 600;
+}
+
+.mindmap-table tr:nth-child(even) {
+  background: #f0fff4;
+}
+
+.mindmap-table tr:hover {
+  background: #d1f2e3;
+}
+
+/* View Button */
+.mindmap-table a {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #38a169, #68d391);
+  color: white;
+  border-radius: 0.8rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.mindmap-table a:hover {
+  background: linear-gradient(135deg, #2f855a, #38a169);
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(56,161,105,0.3);
+}
+
+/* No Mindmaps Text */
+.mindmap-container p {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  color: #2c3e50;
+}
