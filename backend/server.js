@@ -302,6 +302,9 @@ ${moduleContent}
 /**
  * 🔹 Route 5: Process Student Answers (Grading)
  */
+/**
+ * 🔹 Route 5: Process Student Answers (Grading + Cosine Similarity)
+ */
 app.post("/process-answers", async (req, res) => {
   if (answerBuffer.length === 0) {
     return res.status(400).json({ error: "No answers to process" });
@@ -311,17 +314,34 @@ app.post("/process-answers", async (req, res) => {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
-You are a grading assistant.
-Return ONLY JSON array:
+You are a grading assistant. 
+For each student answer, do the following:
+1. Compare it with the correct answer.
+2. Give a score (1 if correct/mostly correct, 0 otherwise).
+3. Provide short feedback.
+4. Compute semantic similarity (cosine similarity %) between student answer and correct answer.
+
+Return ONLY JSON array like this:
 [
-  {"question":"...","userAnswer":"...","correctAnswer":"...","score":0 or 1,"feedback":"..."}
+  {
+    "question": "...",
+    "userAnswer": "...",
+    "correctAnswer": "...",
+    "score": 0 or 1,
+    "feedback": "...",
+    "cosineSimilarity": 0-100
+  }
 ]
 
 Here are the student answers:
-${answerBuffer.map((item, idx) => `
+${answerBuffer
+  .map(
+    (item, idx) => `
 Q${idx + 1}: ${item.question}
 Correct Answer: ${item.correctAnswer}
-Student Answer: ${item.userAnswer}`).join("\n\n")}
+Student Answer: ${item.userAnswer}`
+  )
+  .join("\n\n")}
 `;
 
     let result;
@@ -335,6 +355,7 @@ Student Answer: ${item.userAnswer}`).join("\n\n")}
           correctAnswer: item.correctAnswer,
           score: 0,
           feedback: "Evaluation failed: Gemini quota exceeded.",
+          cosineSimilarity: 0,
         }));
         answerBuffer = [];
         return res.status(429).json({ evaluations: fallback });
@@ -342,13 +363,17 @@ Student Answer: ${item.userAnswer}`).join("\n\n")}
       throw err;
     }
 
-    const evaluations = safeParse(await result.response.text(), answerBuffer.map((item) => ({
-      question: item.question,
-      userAnswer: item.userAnswer,
-      correctAnswer: item.correctAnswer,
-      score: 0,
-      feedback: "Parsing failed.",
-    })));
+    const evaluations = safeParse(
+      await result.response.text(),
+      answerBuffer.map((item) => ({
+        question: item.question,
+        userAnswer: item.userAnswer,
+        correctAnswer: item.correctAnswer,
+        score: 0,
+        feedback: "Parsing failed.",
+        cosineSimilarity: 0,
+      }))
+    );
 
     answerBuffer = [];
     res.json({ evaluations });
@@ -360,6 +385,7 @@ Student Answer: ${item.userAnswer}`).join("\n\n")}
       correctAnswer: item.correctAnswer,
       score: 0,
       feedback: "Evaluation failed.",
+      cosineSimilarity: 0,
     }));
     answerBuffer = [];
     res.json({ evaluations: fallback });

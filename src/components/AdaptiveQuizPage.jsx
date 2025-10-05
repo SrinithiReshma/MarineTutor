@@ -12,7 +12,7 @@ const client = new Client()
 
 const databases = new Databases(client);
 
-const DATABASE_ID = "6894724e002dc704b552"; 
+const DATABASE_ID = "6894724e002dc704b552";
 const REMEDIATION_THRESHOLD = 40;
 
 function AdaptiveQuizPage() {
@@ -28,7 +28,7 @@ function AdaptiveQuizPage() {
     totalQuestions: 0,
     maxScore: 0,
   });
-  const [remediationRoute, setRemediationRoute] = useState(null); // NEW: store which remedial page
+  const [remediationRoute, setRemediationRoute] = useState(null);
 
   const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
   const pickRandom = (arr, n) => shuffle(arr).slice(0, n);
@@ -48,33 +48,36 @@ function AdaptiveQuizPage() {
         );
 
         const mcqs = mcqRes.documents.map((q) => ({ ...q, type: "mcq" }));
-        const descs = descRes.documents.map((q) => ({ ...q, type: "descriptive" }));
+        const descs = descRes.documents.map((q) => ({
+          ...q,
+          type: "descriptive",
+        }));
 
-        // Helper: pick random n from an array
-        const pickRandom = (arr, n) => {
-          const shuffled = [...arr].sort(() => 0.5 - Math.random());
-          return shuffled.slice(0, Math.min(n, arr.length));
+        const pickByDifficulty = (arr) => {
+          const easy = pickRandom(
+            arr.filter((q) => q.tag?.toLowerCase() === "easy"),
+            2
+          );
+          const medium = pickRandom(
+            arr.filter((q) => q.tag?.toLowerCase() === "medium"),
+            2
+          );
+          const hard = pickRandom(
+            arr.filter((q) => q.tag?.toLowerCase() === "hard"),
+            2
+          );
+
+          const selected = [...easy, ...medium, ...hard];
+          if (selected.length < 6) {
+            const remaining = arr.filter((q) => !selected.includes(q));
+            selected.push(...pickRandom(remaining, 6 - selected.length));
+          }
+          return selected;
         };
-
-        // Function to pick 2 easy, 2 medium, 2 hard
-       const pickByDifficulty = (arr) => {
-  const easy = pickRandom(arr.filter((q) => q.tag?.toLowerCase() === "easy"), 2);
-  const medium = pickRandom(arr.filter((q) => q.tag?.toLowerCase() === "medium"), 2);
-  const hard = pickRandom(arr.filter((q) => q.tag?.toLowerCase() === "hard"), 2);
-
-  // Fallback: if some category is empty, pick extra from others
-  const selected = [...easy, ...medium, ...hard];
-  if (selected.length < 6) {
-    const remaining = arr.filter((q) => !selected.includes(q));
-    selected.push(...pickRandom(remaining, 6 - selected.length));
-  }
-  return selected;
-};
 
         const selectedMcqs = pickByDifficulty(mcqs);
         const selectedDescs = pickByDifficulty(descs);
 
-        // Final ordered list (MCQs first then descriptive)
         const ordered = [...selectedMcqs, ...selectedDescs];
 
         setQuestions(ordered);
@@ -132,10 +135,17 @@ function AdaptiveQuizPage() {
         const weight = getWeight(qObj.tag);
         const qId = qObj.$id;
 
+        // ✅ Cosine similarity check
+        if (r.cosineSimilarity && r.cosineSimilarity >= 90) {
+          window.alert(
+            `⚠️ Warning: Your descriptive answer for "${qObj.question}" is very similar to the expected answer (cosine similarity ${r.cosineSimilarity}%). Please ensure it's your own response.`
+          );
+        }
+
         evalResults[qId] = { ...r, score: r.score * weight };
         totalScore += evalResults[qId].score;
         descScore += evalResults[qId].score;
-        descMax += 1; // Max descriptive weight
+        descMax += 1;
         desccrt += evalResults[qId].score > 0 ? 1 : 0;
       });
 
@@ -164,12 +174,16 @@ function AdaptiveQuizPage() {
       setEvaluations(evalResults);
       setSubmitted(true);
 
-      setScoreSummary({ totalScore, totalQuestions: questions.length, maxScore });
+      setScoreSummary({
+        totalScore,
+        totalQuestions: questions.length,
+        maxScore,
+      });
 
       const mcqPercent = mcqMax > 0 ? (mcqcrt / 6) * 100 : 0;
       const descPercent = descMax > 0 ? (desccrt / 6) * 100 : 0;
 
-      // ---------- Decision logic: store remedial route ----------
+      // ---------- Decision logic ----------
       if (mcqPercent < 40 && descPercent < 60) {
         setRemediationRoute("/combined-remediation");
       } else if (mcqPercent < 40) {
@@ -177,12 +191,10 @@ function AdaptiveQuizPage() {
       } else if (descPercent < REMEDIATION_THRESHOLD) {
         setRemediationRoute("/remediation");
       } else {
-  const nextModuleId = parseInt(moduleId) + 1;
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-
-  navigate(`/course/${nextModuleId}`);
-}
-
+        const nextModuleId = parseInt(moduleId) + 1;
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        navigate(`/course/${nextModuleId}`);
+      }
     } catch (err) {
       console.error("Error submitting quiz:", err);
     }
@@ -194,17 +206,20 @@ function AdaptiveQuizPage() {
     try {
       let response;
       if (remediationRoute === "/combined-remediation") {
-        response = await axios.post("http://localhost:5000/generate-combined-remediation", {
-          moduleId,
-        });
+        response = await axios.post(
+          "http://localhost:5000/generate-combined-remediation",
+          { moduleId }
+        );
       } else if (remediationRoute === "/mnemonic-remediation") {
-        response = await axios.post("http://localhost:5000/generate-mnemonic-remediation", {
-          moduleId,
-        });
+        response = await axios.post(
+          "http://localhost:5000/generate-mnemonic-remediation",
+          { moduleId }
+        );
       } else if (remediationRoute === "/remediation") {
-        response = await axios.post("http://localhost:5000/generate-remediation", {
-          moduleId,
-        });
+        response = await axios.post(
+          "http://localhost:5000/generate-remediation",
+          { moduleId }
+        );
       }
       navigate(remediationRoute, { state: response.data });
     } catch (err) {
@@ -285,7 +300,8 @@ function AdaptiveQuizPage() {
                   <strong>Score:</strong> {evaluations[q.$id]?.score ?? "N/A"}
                 </p>
                 <p>
-                  <strong>Feedback:</strong> {evaluations[q.$id]?.feedback ?? "No feedback"}
+                  <strong>Feedback:</strong>{" "}
+                  {evaluations[q.$id]?.feedback ?? "No feedback"}
                 </p>
               </div>
             </div>
@@ -305,3 +321,4 @@ function AdaptiveQuizPage() {
 }
 
 export default AdaptiveQuizPage;
+ 
