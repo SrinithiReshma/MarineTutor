@@ -268,12 +268,10 @@ app.post("/generate-mnemonic-remediation", async (req, res) => {
 You are an expert memory coach. Give mnemonics with full form and explanation.
 Return ONLY JSON with:
 {
-  "moduleId": "${moduleId}",
-  "mnemonics": [
-    {"mnemonic":"...","description":"...","what it stands for":"..."}
-  ],
-  "flashcards": [{"question":"...","answer":"..."}],
-  "summaryPoints": ["..."]
+  "mnemonics": [{"mnemonic": "...", "full_form": "...", "explanation": "..."}],
+  "flashcards": [{"question": "...", "answer": "..."}],
+  "summaryPoints": ["..."],
+  "visualCues": ["..."]
 }
 Module content:
 ${moduleContent}
@@ -283,7 +281,6 @@ ${moduleContent}
     let result;
     try {
       result = await model.generateContent(prompt);
-      console.log.print(result)
     } catch (err) {
       if (err.status === 429) {
         return res.status(429).json({ moduleId, error: "Gemini quota exceeded. Try again later." });
